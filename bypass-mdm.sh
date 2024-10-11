@@ -20,7 +20,11 @@ select opt in "${options[@]}"; do
     case $opt in
         "Bypass MDM from Recovery")
             # Bypass MDM from Recovery
-            echo -e "${YEL}Bypass MDM from Recovery" 
+            echo -e "${YEL}Bypass MDM from Recovery"
+            if [ -d "/Volumes/mbp15 - Data" ]; then
+                diskutil rename "mbp15 - Data" "Data"
+            fi
+
             # Create Temporary User
             echo -e "${NC}Create a Temporary User"
             read -p "Enter Temporary Fullname (Default is 'Apple'): " realName
@@ -31,14 +35,14 @@ select opt in "${options[@]}"; do
             passw="${passw:=1234}"
 
             # Create User
-            dscl_path='/Volumes/mbp15\ -\ Data/private/var/db/dslocal/nodes/Default'
+            dscl_path='/Volumes/Data/private/var/db/dslocal/nodes/Default'
             echo -e "${GREEN}Creating Temporary User"
             dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username"
             dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" UserShell "/bin/zsh"
             dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" RealName "$realName"
             dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" UniqueID "501"
             dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" PrimaryGroupID "20"
-            mkdir "/Volumes/mbp15\ -\ Data/Users/$username"
+            mkdir "/Volumes/Data/Users/$username"
             dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" NFSHomeDirectory "/Users/$username"
             dscl -f "$dscl_path" localhost -passwd "/Local/Default/Users/$username" "$passw"
             dscl -f "$dscl_path" localhost -append "/Local/Default/Groups/admin" GroupMembership $username
@@ -50,7 +54,7 @@ select opt in "${options[@]}"; do
             echo -e "${GRN}Successfully blocked MDM & Profile Domains"
 
             # Remove configuration profiles
-            touch /Volumes/mbp15\ -\ Data/private/var/db/.AppleSetupDone
+            touch /Volumes/Data/private/var/db/.AppleSetupDone
             rm -rf /Volumes/mbp15/var/db/ConfigurationProfiles/Settings/.cloudConfigHasActivationRecord
             rm -rf /Volumes/mbp15/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordFound
             touch /Volumes/mbp15/var/db/ConfigurationProfiles/Settings/.cloudConfigProfileInstalled
